@@ -6,10 +6,6 @@ const authRoute = require("./routes/route");
 const cors = require("cors");
 const compression = require("compression");
 
-
-
-
-
 const app = express();
 const PORT = 5000 || process.env.PORT;
 connectDB();
@@ -38,6 +34,3 @@ app.listen(PORT, () => {
     `Server is running on PORT ${PORT} go to http://localhost:${PORT} to see the server`
   );
 });
-
-
-Authorization: Bearer <TOKEN>
