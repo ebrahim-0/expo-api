@@ -209,6 +209,18 @@ const resetPassword = async (req, res, next) => {
   const salt = 10;
   const hashedPassword = await bcrypt.hash(req.body.newPassword, salt);
 
+  const isOldPassword = await bcrypt.compare(
+    req.body.newPassword,
+    user.password
+  );
+
+  if (isOldPassword) {
+    return res.status(400).json({
+      status: "Failed",
+      message: "New password can't be the same as the old password",
+    });
+  }
+
   // 2) Update user password & Hide passwordResetCode & passwordResetExpires from the result
   user.password = hashedPassword;
   user.passwordResetCode = undefined;
