@@ -6,9 +6,10 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 const forgotPassword = async (req, res) => {
+  // 1) Validate user email
   const schema = Joi.object({ email: Joi.string().required() });
   const { error } = schema.validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+  if (error) return res.status(400).json({ message: error.details[0].message });
 
   const { email } = req.body;
   const user = await User.findOne({ email });
@@ -47,7 +48,8 @@ const forgotPassword = async (req, res) => {
     const schema = Joi.object({ email: Joi.string().email().required() });
     const { error } = schema.validate(req.body);
 
-    if (error) return res.status(400).send(error.details[0].message);
+    if (error)
+      return res.status(400).json({ message: error.details[0].message });
 
     await sendEmail(
       user.email,
@@ -60,7 +62,79 @@ const forgotPassword = async (req, res) => {
     res.status(200).json({
       status: "Success",
       message: "Reset code sent to your email",
-      // userId: user.id,
+      userId: user.id,
+    });
+  } catch (error) {
+    user.passwordResetCode = undefined;
+    user.passwordResetExpires = undefined;
+
+    res.send("An error occurred");
+    console.log(error);
+  }
+};
+
+const resendCode = async (req, res) => {
+  // 1) Validate user email
+  const schema = Joi.object({ userId: Joi.string().required() });
+  const { error } = schema.validate(req.body);
+
+  if (error) return res.status(400).json({ message: error.details[0].message });
+
+  const { userId } = req.body;
+
+  console.log(userId);
+
+  const user = await User.findOne({ _id: userId });
+  if (!user) {
+    return res.status(404).json({
+      status: "Failed",
+      message: "There is no user with this email address",
+    });
+  }
+  // 2) Generate the random reset token or random 5 digits and save it in db (explain it on draw.io)
+  // 2) Generate random reset code and save it in db
+  // save the encrypted reset code into our db and send the un encrypted via email
+  // https://nodejs.org/en/knowledge/cryptography/how-to-use-crypto-module/
+  // generate 5 digit random number in javascript
+
+  const resetCode = Math.floor(Math.random() * 90000 + 10000).toString();
+
+  // encrypt the reset code before saving it in db (Security)
+  const hashedResetCode = crypto
+    .createHash("sha256")
+    .update(resetCode)
+    .digest("hex");
+
+  // console.log(resetCode);
+  // console.log(hashedResetCode);
+
+  // Save password reset code into database
+  user.passwordResetCode = hashedResetCode;
+  // Add expiration time for password reset code (10 min for example)
+  user.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+  // because user maybe send new code after verify one
+  user.resetCodeVerified = false;
+  user.save();
+
+  try {
+    const schema = Joi.object({ userId: Joi.string().required() });
+    const { error } = schema.validate(req.body);
+
+    if (error)
+      return res.status(400).json({ message: error.details[0].message });
+
+    await sendEmail(
+      user.email,
+      "Your Password Reset Code (valid for 10 min)",
+      "",
+      resetCode,
+      user.firstName
+    );
+
+    res.status(200).json({
+      status: "Success",
+      message: "Reset code resent to your email",
+      userId: user.id,
     });
   } catch (error) {
     user.passwordResetCode = undefined;
@@ -74,7 +148,7 @@ const forgotPassword = async (req, res) => {
 const verifyPasswordResetCode = async (req, res, next) => {
   const schema = Joi.object({ resetCode: Joi.string().required() });
   const { error } = schema.validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+  if (error) return res.status(400).json({ message: error.details[0].message });
 
   // 1) Get user based on reset code ! because we have not user id
   const hashedResetCode = crypto
@@ -100,12 +174,12 @@ const verifyPasswordResetCode = async (req, res, next) => {
   res.status(200).json({
     status: "Success",
     message: "Reset code verified successfully",
-    link: `/resetPassword?u=${user._id}`,
+    userId: user._id,
   });
 };
 
 const resetPassword = async (req, res, next) => {
-  const userId = req.query.u;
+  const { userId } = req.query;
 
   if (!userId)
     return res
@@ -114,7 +188,7 @@ const resetPassword = async (req, res, next) => {
 
   const schema = Joi.object({ newPassword: Joi.string().required() });
   const { error } = schema.validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
+  if (error) return res.status(400).json({ message: error.details[0].message });
 
   // 1) Get user based on email
   const user = await User.findOne({ _id: userId });
@@ -157,9 +231,23 @@ const resetPassword = async (req, res, next) => {
     { expiresIn: process.env.TOKEN_EXPIRY }
   );
 
-  res
-    .status(200)
-    .json({ status: "Success", message: "Password reset successfully", token });
+  res.status(200).json({
+    status: "Success",
+    message: "Password reset successfully",
+    token,
+    user: {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      phoneNumber: user.phoneNumber,
+      email: user.email,
+      rule: user.rule,
+    },
+  });
 };
 
-module.exports = { forgotPassword, verifyPasswordResetCode, resetPassword };
+module.exports = {
+  forgotPassword,
+  resendCode,
+  verifyPasswordResetCode,
+  resetPassword,
+};

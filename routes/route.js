@@ -7,6 +7,7 @@ const {
   resetPassword,
   forgotPassword,
   verifyPasswordResetCode,
+  resendCode,
 } = require("../controller/passwordReset.js");
 const router = express.Router();
 
@@ -34,6 +35,9 @@ router.get("/auth/me", authenticate, (req, res) => {
 
 // Route to forgot password
 router.post("/auth/forgotPassword", forgotPassword);
+
+// Route to resendCode
+router.post("/auth/resendCode", resendCode);
 
 // Route to verifyResetCode
 router.post("/auth/verifyResetCode", verifyPasswordResetCode);
