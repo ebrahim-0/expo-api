@@ -18,12 +18,14 @@ const forgotPassword = async (req, res) => {
       message: "There is no user with this email address",
     });
   }
-  // 2) Generate the random reset token or random 6 digits and save it in db (explain it on draw.io)
+  // 2) Generate the random reset token or random 5 digits and save it in db (explain it on draw.io)
   // 2) Generate random reset code and save it in db
   // save the encrypted reset code into our db and send the un encrypted via email
   // https://nodejs.org/en/knowledge/cryptography/how-to-use-crypto-module/
-  // generate 6 digit random number in javascript
-  const resetCode = Math.floor(Math.random() * 1000000 + 1).toString();
+  // generate 5 digit random number in javascript
+
+  const resetCode = Math.floor(Math.random() * 90000 + 10000).toString();
+
   // encrypt the reset code before saving it in db (Security)
   const hashedResetCode = crypto
     .createHash("sha256")
