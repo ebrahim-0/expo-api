@@ -30,7 +30,5 @@ app.use("/api/v1", authRoute);
 
 app.listen(PORT, () => {
   console.log(`Server is running on PORT ${PORT}`);
-  console.log(
-    `Server is running on PORT ${PORT} go to http://localhost:${PORT} to see the server`
-  );
+  console.log(`Go to http://localhost:${PORT} to see the server`);
 });
