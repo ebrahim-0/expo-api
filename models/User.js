@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema(
 
     rule: {
       type: String,
-      enum: ["visitor", "employee"],
+      enum: ["guest", "admin", "visitor", "employee"],
       default: "visitor",
     },
   },

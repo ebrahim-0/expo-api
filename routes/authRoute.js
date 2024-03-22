@@ -9,17 +9,21 @@ const {
   verifyPasswordResetCode,
   resendCode,
 } = require("../controller/passwordReset.js");
+const guest = require("../controller/guest.js");
 const router = express.Router();
 
 // Route to create a new user
 
-router.post("/auth/register", createUser);
+router.post("/register", createUser);
 
 // Route to login
-router.post("/auth/login", login);
+router.post("/login", login);
+
+// Route to create a guest user
+router.get("/guest", guest);
 
 // Route to get user profile
-router.get("/auth/me", authenticate, (req, res) => {
+router.get("/me", authenticate, (req, res) => {
   res.json({
     message: `Welcome ${req.user.firstName}`,
     user: {
@@ -34,27 +38,21 @@ router.get("/auth/me", authenticate, (req, res) => {
 });
 
 // Route to forgot password
-router.post("/auth/forgotPassword", forgotPassword);
+router.post("/forgotPassword", forgotPassword);
 
 // Route to resendCode
-router.post("/auth/resendCode", resendCode);
+router.post("/resendCode", resendCode);
 
 // Route to verifyResetCode
-router.post("/auth/verifyResetCode", verifyPasswordResetCode);
+router.post("/verifyResetCode", verifyPasswordResetCode);
 
 // Route to resetPassword
-router.put("/auth/resetPassword", resetPassword);
+router.put("/resetPassword", resetPassword);
 
 // Route to logout
-router.get("/auth/logout", (req, res) => {
+router.get("/logout", (req, res) => {
   res.clearCookie("token");
   res.json({ message: "Logged out" });
-});
-
-router.get("/", (req, res) => {
-  res.json({
-    message: "expo-api",
-  });
 });
 
 module.exports = router;

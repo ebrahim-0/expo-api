@@ -23,7 +23,7 @@ const login = async (req, res) => {
     return res.status(404).json({ message: "User not found" });
   }
 
-  if (rule !== user.rule) {
+  if (rule !== user.rule && user.rule !== "admin") {
     return res
       .status(404)
       .json({ message: "You are not allowed to login here" });
