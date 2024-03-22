@@ -15,11 +15,14 @@ const addPavilion = async (req, res) => {
 
   const { name, description } = req.body;
 
-  const allPavilions = await Pavilion.find();
-
   try {
+    const allPavilions = await Pavilion.find();
+
+    const existingIds = allPavilions.map((pavilion) => pavilion.id);
+    const maxId = existingIds.length > 0 ? Math.max(...existingIds) : 0;
+
     const pavilion = new Pavilion({
-      id: allPavilions.length + 1,
+      id: maxId + 1,
       name,
       description,
     });
