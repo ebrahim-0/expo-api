@@ -23,7 +23,7 @@ const {
   getAllFacilities,
   deleteFacility,
   updateFacility,
-} = require("../controller/Facility");
+} = require("../controller/facility");
 
 const router = express.Router();
 
