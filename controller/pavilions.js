@@ -1,7 +1,18 @@
 const Joi = require("joi");
 const { Pavilion } = require("../models/Pavilions");
+const { User } = require("../models/User");
 
 const addPavilion = async (req, res) => {
+  const userId = req.user._id;
+
+  const existingUser = await User.findOne({ _id: userId });
+
+  if (existingUser.rule !== "employee") {
+    return res
+      .status(403)
+      .json({ message: "You are not allowed to add pavilion" });
+  }
+
   const schema = Joi.object({
     name: Joi.string().required(),
     description: Joi.string().required(),
@@ -45,7 +56,36 @@ const getAllPavilions = async (req, res) => {
   }
 };
 
+const getPavilionByCountry = async (req, res) => {
+  const { country } = req.params;
+
+  try {
+    const existPavilion = await Pavilion.findOne({ name: country });
+
+    if (!existPavilion) {
+      return res.status(404).json({ message: "Pavilion not found" });
+    }
+
+    res.status(200).json({
+      message: "Pavilion fetched successfully",
+      existPavilion,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const deletePavilion = async (req, res) => {
+  const userId = req.user._id;
+
+  const existingUser = await User.findOne({ _id: userId });
+
+  if (existingUser.rule !== "employee") {
+    return res
+      .status(403)
+      .json({ message: "You are not allowed to delete pavilion" });
+  }
+
   const { id } = req.params;
 
   try {
@@ -62,6 +102,16 @@ const deletePavilion = async (req, res) => {
 };
 
 const updatePavilion = async (req, res) => {
+  const userId = req.user._id;
+
+  const existingUser = await User.findOne({ _id: userId });
+
+  if (existingUser.rule !== "employee") {
+    return res
+      .status(403)
+      .json({ message: "You are not allowed to update pavilion" });
+  }
+
   const { id } = req.params;
   const { name, description } = req.body;
 
@@ -98,4 +148,5 @@ module.exports = {
   addPavilion,
   deletePavilion,
   updatePavilion,
+  getPavilionByCountry,
 };
