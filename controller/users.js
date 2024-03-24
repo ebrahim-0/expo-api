@@ -35,6 +35,16 @@ const getUserById = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
+  const { userId } = req.user;
+
+  const existingUser = await User.findById({ _id: userId });
+
+  if (existingUser.role === "admin") {
+    return res
+      .status(401)
+      .json({ message: "You are not allowed to delete a admin user" });
+  }
+
   const user = await User.findByIdAndDelete(req.params.id);
 
   if (!user) {
