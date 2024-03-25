@@ -45,7 +45,7 @@ const getPavilionReviews = async (req, res) => {
     const pavilionReviews = await PavilionReview.findOne({ country });
 
     if (!pavilionReviews) {
-      return res.status(404).json({ message: "Pavilion not found" });
+      return res.status(404).json({ message: "No reviews found" });
     }
 
     res.status(200).json({
