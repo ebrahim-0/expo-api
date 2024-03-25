@@ -24,6 +24,12 @@ const {
   deleteFacility,
   updateFacility,
 } = require("../controller/facility");
+const {
+  addShowTime,
+  getAllShowTimes,
+  deleteShowTime,
+  updateShowTime,
+} = require("../controller/showTime");
 
 const router = express.Router();
 
@@ -62,5 +68,13 @@ router.get("/getAllFacilities", authenticate, getAllFacilities);
 router.delete("/deleteFacility/:id", authenticate, deleteFacility);
 
 router.put("/updateFacility/:id", authenticate, updateFacility);
+
+router.post("/addShowTime", authenticate, addShowTime);
+
+router.delete("/deleteShowTime/:id", authenticate, deleteShowTime);
+
+router.put("/updateShowTime/:id", authenticate, updateShowTime);
+
+router.get("/getAllShowTimes", authenticate, getAllShowTimes);
 
 module.exports = router;
